@@ -1,3 +1,24 @@
 # tehnozavr_v3
-Redoing the project on Vue 3, self-development without the help of the course, I use documentation only. 
-Stack: Vue 3, vue router, pinia, axios
+
+## Project setup
+```
+npm install
+```
+
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
+
+### Compiles and minifies for production
+```
+npm run build
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
