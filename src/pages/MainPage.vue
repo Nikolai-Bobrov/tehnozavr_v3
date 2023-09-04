@@ -10,7 +10,7 @@
     </div>
 
     <div class="content__catalog">
-      <ProductFilter/>
+      <ProductFilter v-model:category-id="filterCategoryId" v-model:color-id="filterColor" v-model:price-from="filterPriceFrom" v-model:price-to="filterPriceTo"/>
       <div v-if="productsLoading" class="loadProd">
         <span class="loader"></span>
         <p>Идет загрузка товара</p>
@@ -24,7 +24,7 @@
         <button class="button--reload" @click.prevent="loadProducts">Попробовать еще раз</button>
       </div>
 
-      <ProductList v-if="productsLoading === false" :products="products" :pages="pagesFn" v-model:pagePaginate="page"/>
+      <ProductList v-if="productsLoading === false" :products="products" :pages="pages" v-model:pagePaginate="page"/>
 
     </div>
   </main>
@@ -53,6 +53,12 @@ export default defineComponent({
       page: 1,
       productsPerPage: 6,
 
+      // Фильтрация товаров
+      filterPriceFrom: null,
+      filterPriceTo: null,
+      filterColor:0,
+      filterCategoryId:0
+
     }
   },
   computed: {
@@ -62,14 +68,26 @@ export default defineComponent({
     products(){
       return this.storeProducts ? this.storeProducts.items : null;
     },
-    pagesFn(){
+    pages(){
       return this.storeProducts ? this.storeProducts.pagination.pages : 0;
-    }
+    },
   },
   watch:{
     page(){
       this.loadProducts()
-    }
+    },
+    filterCategoryId(){
+      this.loadProducts()
+    },
+    filterPriceFrom(){
+      this.loadProducts()
+    },
+    filterPriceTo(){
+      this.loadProducts()
+    },
+    // filterColor(){
+    //   this.loadProducts()
+    // }
   },
   methods: {
     loadProducts(){
@@ -79,7 +97,10 @@ export default defineComponent({
         axios.get(API_BASE_URL + "/api/products", {
           params:{
             limit: this.productsPerPage,
-            page: this.page
+            page: this.page,
+            categoryId: this.filterCategoryId,
+            minPrice: this.filterPriceFrom,
+            maxPrice: this.filterPriceTo
           }
         })
             .then(response => (this.storeProducts = response.data))
@@ -87,7 +108,6 @@ export default defineComponent({
             .then(()=> this.productsLoading = false)
       },500)
     },
-
   },
   created() {
     this.loadProducts();

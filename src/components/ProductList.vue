@@ -1,14 +1,11 @@
 <template>
   <section class="catalog">
-
     <ul class="catalog__list">
-
       <ProductItem v-for="product in products" :product="product" :key="product.id"/>
     </ul>
       <BasePagination :pages="pages" v-model:page="page"/>
   </section>
 </template>
-
 
 <script>
 import {defineComponent} from 'vue'

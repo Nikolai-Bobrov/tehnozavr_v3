@@ -3,15 +3,15 @@
   <aside class="filter">
     <h2 class="filter__title">Фильтры</h2>
 
-    <form class="filter__form form" action="#" method="get">
+    <form class="filter__form form" action="#" method="get" @submit.prevent="submit">
       <fieldset class="form__block">
         <legend class="form__legend">Цена</legend>
-        <label class="form__label form__label--price">
-          <input class="form__input" type="text" name="min-price" value="0">
+        <label class="form__label form__label--price" >
+          <input class="form__input" type="text" name="min-price" v-model.number="currentPriceFrom" placeholder="0">
           <span class="form__value">От</span>
         </label>
         <label class="form__label form__label--price">
-          <input class="form__input" type="text" name="max-price" value="12345">
+          <input class="form__input" type="text" name="max-price" v-model.number="currentPriceTo" placeholder="">
           <span class="form__value">До</span>
         </label>
       </fieldset>
@@ -19,11 +19,9 @@
       <fieldset class="form__block">
         <legend class="form__legend">Категория</legend>
         <label class="form__label form__label--select">
-          <select class="form__select" type="text" name="category">
-            <option value="value1">Все категории</option>
-            <option value="value2">Зубные щетки</option>
-            <option value="value3">Телефоны</option>
-            <option value="value4">Спортинвентарь</option>
+          <select class="form__select" type="text" name="category" v-model.number="currentCategoryId">
+            <option value="0">Все категории</option>
+            <option v-for="category in categories" :value="category.id" :key="category.id">{{ category.title }}</option>
           </select>
         </label>
       </fieldset>
@@ -31,49 +29,12 @@
       <fieldset class="form__block">
         <legend class="form__legend">Цвет</legend>
         <ul class="colors">
-          <li class="colors__item">
+          <li class="colors__item" v-for="color in colors" :key="color.id">
             <label class="colors__label">
-              <input class="colors__radio sr-only" type="radio" name="color" value="#73B6EA" checked="">
-              <span class="colors__value" style="background-color: #73B6EA;">
-                  </span>
+              <input class="colors__radio sr-only" type="radio" name="color" :value="color.id" checked="" v-model.number="currentColorId">
+              <span class="colors__value" :style="{ backgroundColor: color.code  }">
+              </span>
             </label>
-          </li>
-          <li class="colors__item">
-            <label class="colors__label">
-              <input class="colors__radio sr-only" type="radio" name="color" value="#FFBE15">
-              <span class="colors__value" style="background-color: #FFBE15;">
-                  </span>
-            </label>
-          </li>
-          <li class="colors__item">
-            <label class="colors__label">
-              <input class="colors__radio sr-only" type="radio" name="color" value="#939393">
-              <span class="colors__value" style="background-color: #939393;">
-                </span></label>
-          </li>
-          <li class="colors__item">
-            <label class="colors__label">
-              <input class="colors__radio sr-only" type="radio" name="color" value="#8BE000">
-              <span class="colors__value" style="background-color: #8BE000;">
-                </span></label>
-          </li>
-          <li class="colors__item">
-            <label class="colors__label">
-              <input class="colors__radio sr-only" type="radio" name="color" value="#FF6B00">
-              <span class="colors__value" style="background-color: #FF6B00;">
-                </span></label>
-          </li>
-          <li class="colors__item">
-            <label class="colors__label">
-              <input class="colors__radio sr-only" type="radio" name="color" value="#FFF">
-              <span class="colors__value" style="background-color: #FFF;">
-                </span></label>
-          </li>
-          <li class="colors__item">
-            <label class="colors__label">
-              <input class="colors__radio sr-only" type="radio" name="color" value="#000">
-              <span class="colors__value" style="background-color: #000;">
-                </span></label>
           </li>
         </ul>
       </fieldset>
@@ -141,7 +102,7 @@
       <button class="filter__submit button button--primery" type="submit">
         Применить
       </button>
-      <button class="filter__reset button button--second" type="button">
+      <button class="filter__reset button button--second" type="button" @click.prevent="reset">
         Сбросить
       </button>
     </form>
@@ -151,8 +112,75 @@
 
 <script>
 import {defineComponent} from 'vue'
+import {API_BASE_URL} from "@/config";
+import axios from "axios";
 
 export default defineComponent({
-  name: "ProductFilter"
+  name: "ProductFilter",
+  props:['categoryId', 'colorId', 'priceFrom', 'priceTo'],
+  emits:['update:categoryId', 'update:colorId', 'update:priceFrom', 'update:priceTo'],
+  data(){
+    return {
+      currentCategoryId:0,
+      currentColorId:0,
+      currentPriceFrom:null,
+      currentPriceTo: null,
+
+
+      colorsData: null,
+      categoriesData:null,
+    }
+  },
+  computed:{
+    categories(){
+      return this.categoriesData ? this.categoriesData.items : [];
+    },
+    colors(){
+      return this.colorsData ?this.colorsData.items : [];
+    }
+  },
+  watch: {
+    categoryId(value){
+      this.currentCategoryId = value;
+    },
+    colorId(value){
+      this.currentColorId = value;
+    },
+    priceFrom(value){
+      this.currentPriceFrom = value;
+    },
+    priceTo(value){
+      this.currentPriceTo = value;
+    }
+
+  },
+  methods:{
+    submit(){
+      this.$emit('update:categoryId', this.currentCategoryId);
+      this.$emit('update:colorId', this.currentColorId);
+      this.$emit('update:priceFrom', this.currentPriceFrom);
+      this.$emit('update:priceTo', this.currentPriceTo)
+    },
+    reset(){
+      this.$emit('update:categoryId', 0);
+      this.$emit('update:colorId', 0);
+      this.$emit('update:priceFrom', null);
+      this.$emit('update:priceTo', null);
+
+    },
+    loadCategories(){
+      axios.get(API_BASE_URL + '/api/productCategories')
+          .then(response => this.categoriesData = response.data)
+    },
+    loadColors(){
+      axios.get(API_BASE_URL + '/api/colors')
+          .then(response => this.colorsData = response.data)
+    }
+  },
+
+  created(){
+    this.loadColors()
+    this.loadCategories()
+  }
 })
 </script>
