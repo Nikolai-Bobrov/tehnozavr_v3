@@ -1,6 +1,6 @@
 
 <template>
-  <ul class="catalog__pagination pagination">
+  <ul class="catalog__pagination pagination" v-if="pages > 0">
     <li class="pagination__item">
       <a class="pagination__link pagination__link--arrow" :class="{'pagination__link--disabled' : page === 1}" aria-label="Предыдущая страница" @click.prevent="paginateBack(page - 1)">
         <svg width="8" height="14" fill="currentColor">

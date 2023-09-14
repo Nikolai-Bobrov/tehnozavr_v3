@@ -10,11 +10,13 @@
     </div>
 
     <div class="content__catalog">
-      <ProductFilter v-model:category-id="filterCategoryId" v-model:color-id="filterColor" v-model:price-from="filterPriceFrom" v-model:price-to="filterPriceTo"/>
+      <ProductFilter v-model:filter-prop-id="filterPropId" v-model:filter-name="filterName" v-model:category-id="filterCategoryId" v-model:color-id="filterColor" v-model:price-from="filterPriceFrom" v-model:price-to="filterPriceTo"/>
+
       <div v-if="productsLoading" class="loadProd">
         <span class="loader"></span>
         <p>Идет загрузка товара</p>
       </div>
+
       <div v-if="productsLoadingFailed" class="loadProd">
         <svg fill="#000000" width="800px" height="800px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
           <title>cross-round</title>
@@ -48,7 +50,8 @@ export default defineComponent({
       countProducts: null,
       productsLoading: false,
       productsLoadingFailed: false,
-      
+
+
       // Пагинация
       page: 1,
       productsPerPage: 6,
@@ -56,9 +59,10 @@ export default defineComponent({
       // Фильтрация товаров
       filterPriceFrom: null,
       filterPriceTo: null,
-      filterColor:0,
-      filterCategoryId:0
-
+      filterColor: 0,
+      filterCategoryId:0,
+      filterName: [],
+      filterPropId: [],
     }
   },
   computed: {
@@ -66,7 +70,13 @@ export default defineComponent({
       return this.storeProducts ? this.storeProducts.pagination.total : 0;
     },
     products(){
-      return this.storeProducts ? this.storeProducts.items : null;
+      return this.storeProducts
+          ? this.storeProducts.items.map(product => {
+            return {
+              ...product,
+              preview: product.preview.file.url
+            }
+          }) : null;
     },
     pages(){
       return this.storeProducts ? this.storeProducts.pagination.pages : 0;
@@ -85,6 +95,12 @@ export default defineComponent({
     filterPriceTo(){
       this.loadProducts()
     },
+    filterName(){
+      this.loadProducts()
+    },
+    filterPropId(){
+      this.loadProducts()
+    }
     // filterColor(){
     //   this.loadProducts()
     // }
@@ -92,6 +108,7 @@ export default defineComponent({
   methods: {
     loadProducts(){
       this.productsLoading = true
+      this.productsLoadingFailed = false
       clearTimeout(this.loadProductsTimer);
       this.loadProductsTimer = setTimeout(() => {
         axios.get(API_BASE_URL + "/api/products", {
@@ -100,7 +117,9 @@ export default defineComponent({
             page: this.page,
             categoryId: this.filterCategoryId,
             minPrice: this.filterPriceFrom,
-            maxPrice: this.filterPriceTo
+            maxPrice: this.filterPriceTo,
+            [this.filterName]: this.filterPropId,
+
           }
         })
             .then(response => (this.storeProducts = response.data))

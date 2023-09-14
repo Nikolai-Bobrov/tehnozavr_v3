@@ -3,7 +3,7 @@
     <ul class="catalog__list">
       <ProductItem v-for="product in products" :product="product" :key="product.id"/>
     </ul>
-      <BasePagination :pages="pages" v-model:page="page"/>
+      <BasePagination v-if="products" :pages="pages" v-model:page="page"/>
   </section>
 </template>
 

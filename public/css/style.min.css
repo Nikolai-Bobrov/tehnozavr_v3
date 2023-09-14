@@ -1148,7 +1148,7 @@ a {
     width: 270px;
     height: 350px;
     -o-object-fit: cover;
-    object-fit: cover
+    /*object-fit: cover*/
 }
 
 .catalog__title {
