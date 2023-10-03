@@ -7,7 +7,7 @@
       <fieldset class="form__block">
         <legend class="form__legend">Цена</legend>
         <label class="form__label form__label--price" >
-          <input class="form__input" type="text" name="min-price" v-model.number="currentPriceFrom" placeholder="0">
+          <input class="form__input" type="number" name="min-price" v-model.number="currentPriceFrom" placeholder="0">
           <span class="form__value">От</span>
         </label>
         <label class="form__label form__label--price">
@@ -33,7 +33,7 @@
           <ul class="check-list">
             <li class="check-list__item" v-for="property in prop.availableValues" :key="property.value">
               <label class="check-list__label">
-                <input class="check-list__check sr-only" type="checkbox" name="volume" v-model="currentFilterPropId" :value="property.value" @click="addCurrentFilterProp(prop.code)">
+                <input class="check-list__check sr-only" type="checkbox" name="volume" v-model="currentFilterPropId" :value="property.value" @change="addCurrentFilterProp(prop.code)">
                 <span class="check-list__desc" >
                     {{ property.value }}
                     <span>({{ property.productsCount }})</span>
@@ -63,23 +63,20 @@ import axios from "axios";
 
 export default defineComponent({
   name: "ProductFilter",
-  props:['categoryId', 'colorId', 'priceFrom', 'priceTo', 'filterName','filterPropId'],
-  emits:['update:categoryId', 'update:colorId', 'update:priceFrom', 'update:priceTo', 'update:filterName', 'update:filterPropId'],
+  // props:['filterData', 'colorId', 'priceTo', 'filterName','filterPropId'],
+  emits:['update:categoryId',  'update:priceFrom', 'update:priceTo', 'update:filterName', 'update:filterPropId'],
   data(){
     return {
-      colorsData: null,
       categoriesData:null,
+      categoryDesc: null,
 
       currentCategoryId:0,
-      currentColorId:0,
 
       currentPriceFrom:null,
       currentPriceTo: null,
 
       currentFilterName: [],
       currentFilterPropId: [],
-
-      categoryDesc: null,
 
       btnReset: false
     }
@@ -88,33 +85,12 @@ export default defineComponent({
     categories(){
       return this.categoriesData ? this.categoriesData.items : [];
     },
-    colors(){
-      return this.colorsData ? this.colorsData.items : [];
-    },
 
     categoryProp(){
       return this.categoryDesc ? this.categoryDesc.productProps :[];
     }
   },
   watch: {
-    categoryId(value){
-      this.currentCategoryId = value;
-    },
-    colorId(value){
-      this.currentColorId = value;
-    },
-    priceFrom(value){
-      this.currentPriceFrom = value;
-    },
-    priceTo(value){
-      this.currentPriceTo = value;
-    },
-    filterName(value){
-      this.currentFilterName = value;
-    },
-    filterPropId(value){
-      this.currentFilterPropId = value;
-    },
     currentCategoryId(){
       if(this.currentCategoryId !== 0){
         this.btnReset = true
@@ -137,7 +113,6 @@ export default defineComponent({
   methods:{
     submit(){
       this.$emit('update:categoryId', this.currentCategoryId);
-      this.$emit('update:colorId', this.currentColorId);
       this.$emit('update:priceFrom', this.currentPriceFrom);
       this.$emit('update:priceTo', this.currentPriceTo);
       this.$emit('update:filterName', this.currentFilterName);
@@ -145,7 +120,6 @@ export default defineComponent({
     },
     reset(){
       this.$emit('update:categoryId', 0);
-      this.$emit('update:colorId', 0);
       this.$emit('update:priceFrom', null);
       this.$emit('update:priceTo', null);
       this.$emit('update:filterName', []);
@@ -160,10 +134,6 @@ export default defineComponent({
       axios.get(API_BASE_URL + '/api/productCategories')
           .then(response => this.categoriesData = response.data)
     },
-    loadColors(){
-      axios.get(API_BASE_URL + '/api/colors')
-          .then(response => this.colorsData = response.data)
-    },
     getCategory(){
       if(this.currentCategoryId) {
         axios.get(API_BASE_URL + '/api/productCategories/' + this.currentCategoryId)
@@ -172,19 +142,11 @@ export default defineComponent({
        return this.categoryDesc = [];
       }
     },
-    addCurrentFilterProp( code){
+    addCurrentFilterProp(code){
       this.currentFilterName = `props[${code}]`;
-      // this.currentFilterPropId.push(value);
-      // this.currentFilterPropId.map((item) => {
-      //   if(item !== value){
-      //     this.currentFilterPropId.push(value)
-      //   }
-      // })
-
     }
   },
   created(){
-    this.loadColors()
     this.loadCategories()
   }
 })

@@ -1,13 +1,13 @@
 <template>
   <li class="catalog__item" :key="product.id">
-    <a class="catalog__pic" href="#">
+    <router-link :to="{ path:`/product/${product.id}` }" class="catalog__pic" href="#">
       <img :src="product.preview"  :alt="product.title">
-    </a>
+    </router-link>
 
     <h3 class="catalog__title">
-      <a href="#">
+      <router-link :to="{ path:`/product/${product.id}` }">
         {{ titleProduct }}
-      </a>
+      </router-link>
     </h3>
 
     <span class="catalog__price">
@@ -27,7 +27,7 @@
     <ul class="sizes" v-if="mainProp !== propListColors">
       <li class="sizes__item" v-for="offer in offers" :key="offer.id">
         <label class="sizes__label">
-          <input class="sizes__radio sr-only" type="radio" name="sizes-1" :value="offer.propValues" >
+          <input class="sizes__radio sr-only" type="radio" name="sizes-1" :value="offer.propValues" :checked="first">
           <span class="sizes__value" @click="productPriceOffer(offer.price, offer.title)">
             {{ offer.propValues }}
           </span>

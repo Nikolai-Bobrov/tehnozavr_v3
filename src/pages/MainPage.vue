@@ -10,7 +10,13 @@
     </div>
 
     <div class="content__catalog">
-      <ProductFilter v-model:filter-prop-id="filterPropId" v-model:filter-name="filterName" v-model:category-id="filterCategoryId" v-model:color-id="filterColor" v-model:price-from="filterPriceFrom" v-model:price-to="filterPriceTo"/>
+      <ProductFilter
+          @update:priceFrom="updatePriceFrom"
+          @update:priceTo="updatePriceTo"
+          @update:filterName="updatefilterName"
+          @update:filterPropId="updatefilterPropId"
+          @update:categoryId="updatecategoryId"
+      />
 
       <div v-if="productsLoading" class="loadProd">
         <span class="loader"></span>
@@ -34,13 +40,13 @@
 
 
 <script>
-import {defineComponent} from 'vue'
+// import {defineComponent} from 'vue'
 import ProductList from "@/components/ProductList.vue";
 import ProductFilter from "@/components/ProductFilter.vue";
 import axios from "axios";
 import {API_BASE_URL} from "@/config";
 
-export default defineComponent({
+export default {
   name: "MainPage",
   components: {ProductList, ProductFilter},
   data(){
@@ -106,6 +112,22 @@ export default defineComponent({
     // }
   },
   methods: {
+    updatePriceFrom(value){
+      this.filterPriceFrom = value
+    },
+    updatePriceTo(value){
+      this.filterPriceTo = value
+    },
+    updatecategoryId(value){
+      this.filterCategoryId = value
+    },
+    updatefilterName(value){
+      this.filterName = value
+    },
+    updatefilterPropId(value){
+      this.filterPropId = value
+    },
+
     loadProducts(){
       this.productsLoading = true
       this.productsLoadingFailed = false
@@ -124,12 +146,12 @@ export default defineComponent({
         })
             .then(response => (this.storeProducts = response.data))
             .catch(() => this.productsLoadingFailed = true)
-            .then(()=> this.productsLoading = false)
+            .then(() => this.productsLoading = false)
       },500)
     },
   },
   created() {
     this.loadProducts();
   }
-})
+}
 </script>
